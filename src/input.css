@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+#image {
+  background-image: url('./avatar.webp');
+  background-position: center;
+  background-size: cover;
+
+  /* box-shadow: 0px 5px 10px 2px black; */
+}
