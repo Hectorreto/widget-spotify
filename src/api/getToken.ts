@@ -1,8 +1,8 @@
 const endpoint = 'https://accounts.spotify.com/api/token'
-const clientId = '641c231df49046e58daaa799da950681';
-const clientSecret = 'fc117c44dc984668bbdbdc2f412cefe3';
+const clientId = process.env.CLIENT_ID || '';
+const clientSecret = process.env.CLIENT_SECRET || '';
 
-const getToken = async () => {
+export const getToken = async () => {
   const requestBody = new URLSearchParams();
   requestBody.append('grant_type', 'client_credentials');
   requestBody.append('client_id', clientId);

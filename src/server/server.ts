@@ -1,13 +1,14 @@
-const { clientId: client_id, clientSecret: client_secret } = require("../env");
-const express = require('express')
-const querystring = require('querystring');
+const client_id = process.env.CLIENT_ID || '';
+const client_secret = process.env.CLIENT_SECRET || '';
+import express from 'express';
+import querystring from 'querystring';
 
-var redirect_uri = 'https://1aee-2806-2f0-5161-ff4d-ac55-bac7-752-c170.ngrok-free.app/callback';
+const redirect_uri = 'https://1aee-2806-2f0-5161-ff4d-ac55-bac7-752-c170.ngrok-free.app/callback';
 let lastState = '';
 
-var app = express();
+const app = express();
 
-const generateRandomString = (n) => {
+const generateRandomString = (n: number) => {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let randomString = '';
 
@@ -46,10 +47,10 @@ app.get('/', (req, res) => {
   `);
 })
 
-app.get('/login', function(req, res) {
+app.get('/login', (req, res) => {
 
-  var state = generateRandomString(16);
-  var scope = 'user-read-currently-playing';
+  const state = generateRandomString(16);
+  const scope = 'user-read-currently-playing';
 
   res.redirect('https://accounts.spotify.com/authorize?' +
     querystring.stringify({
@@ -71,30 +72,19 @@ app.get('/callback', function(req, res) {
         error: 'state_mismatch'
       }));
   } else {
-    var authOptions = {
-      method: 'POST',
-      url: 'https://accounts.spotify.com/api/token',
-      form: {
-        code: code,
-        redirect_uri: redirect_uri,
-        grant_type: 'authorization_code'
-      },
-      headers: {
-        'content-type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Basic ' + (new Buffer.from(client_id + ':' + client_secret).toString('base64'))
-      },
-      json: true
-    };
+    // @ts-expect-error Buffer doesn't have a type for its constructor
+    const authorization = new Buffer.from(client_id + ':' + client_secret).toString('base64');
+    const url = 'https://accounts.spotify.com/api/token';
 
     const requestBody = new URLSearchParams();
     requestBody.append('grant_type', 'authorization_code');
-    requestBody.append('code', code);
+    requestBody.append('code', code as string);
     requestBody.append('redirect_uri', redirect_uri);
 
-    fetch(authOptions.url, {
+    fetch(url, {
       method: 'POST',
       headers: {
-        'Authorization': authOptions.headers.Authorization,
+        'Authorization': `Basic ${authorization}`,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: requestBody.toString(),
