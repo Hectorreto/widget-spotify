@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useState } from 'react'
-import { getCurrentlyPlaying } from './api/getCurrentlyPlaying'
+import { useCallback, useEffect, useState } from 'react';
+import { getCurrentlyPlaying } from './api/getCurrentlyPlaying';
 import { getRefreshToken } from './api/getRefreshToken';
 
 export const App = () => {
-  const [artist, setArtist] = useState(''); 
+  const [artist, setArtist] = useState('');
   const [song, setSong] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [token, setToken] = useState<string>();
@@ -11,28 +11,29 @@ export const App = () => {
   const saveToken = (value: string) => {
     setToken(value);
     localStorage.setItem('token', value);
-  }
+  };
 
   useEffect(() => {
     const oldToken = localStorage.getItem('token');
     if (oldToken) {
       setToken(oldToken);
     }
-  }, [])
+  }, []);
 
   const updateData = useCallback(async () => {
     if (!token) return;
     try {
-      const data = await getCurrentlyPlaying(token)
+      const data = await getCurrentlyPlaying(token);
       const artists = data.item.artists;
       if (Array.isArray(artists)) {
-        const names = artists.map((artist) => artist.name);
+        const names = artists.map(artist => artist.name);
         setArtist(names.join(', '));
       }
-  
+
       setSong(data.item.name);
       setImageUrl(data.item.album.images[1].url);
-    } catch(error) {
+    }
+    catch (error) {
       if (error instanceof Error) {
         if (error.message.startsWith('4')) {
           return getRefreshToken().then(saveToken);
@@ -46,13 +47,13 @@ export const App = () => {
     const interval = setInterval(updateData, 10000);
     return () => {
       clearInterval(interval);
-    }
-  }, [updateData])
+    };
+  }, [updateData]);
 
   return (
-    <main className='min-h-screen flex justify-center items-center'>
+    <main className="min-h-screen flex justify-center items-center">
       <div className="flex gap-8 bg-blue-950 bg-opacity-40 p-6 rounded-3xl text-pretty shadow-md min-w-[800px]">
-        <div className='w-[200px] h-[200px] rounded-[25px] shadow-2xl overflow-hidden'>
+        <div className="w-[200px] h-[200px] rounded-[25px] shadow-2xl overflow-hidden">
           <img src={imageUrl} className="w-full h-full object-cover" alt="Song Image" />
         </div>
         <div className="flex-1 flex flex-col">
@@ -64,5 +65,5 @@ export const App = () => {
         </div>
       </div>
     </main>
-  )
-}
+  );
+};

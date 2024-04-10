@@ -19,7 +19,7 @@ const generateRandomString = (n: number) => {
 
   lastState = randomString;
   return randomString;
-}
+};
 
 app.get('/', (req, res) => {
   res.send(`
@@ -45,33 +45,33 @@ app.get('/', (req, res) => {
     </div>
 
   `);
-})
+});
 
 app.get('/login', (req, res) => {
-
   const state = generateRandomString(16);
   const scope = 'user-read-currently-playing';
 
-  res.redirect('https://accounts.spotify.com/authorize?' +
-    querystring.stringify({
-      response_type: 'code',
-      client_id: client_id,
-      scope: scope,
-      redirect_uri: redirect_uri,
-      state: state
-    }));
+  res.redirect('https://accounts.spotify.com/authorize?'
+  + querystring.stringify({
+    response_type: 'code',
+    client_id: client_id,
+    scope: scope,
+    redirect_uri: redirect_uri,
+    state: state,
+  }));
 });
 
-app.get('/callback', function(req, res) {
+app.get('/callback', function (req, res) {
   const code = req.query.code || null;
   const state = req.query.state || null;
 
   if (state === null || state !== lastState) {
-    res.redirect('/#' +
-      querystring.stringify({
-        error: 'state_mismatch'
-      }));
-  } else {
+    res.redirect('/#'
+    + querystring.stringify({
+      error: 'state_mismatch',
+    }));
+  }
+  else {
     // @ts-expect-error Buffer doesn't have a type for its constructor
     const authorization = new Buffer.from(client_id + ':' + client_secret).toString('base64');
     const url = 'https://accounts.spotify.com/api/token';
@@ -91,10 +91,9 @@ app.get('/callback', function(req, res) {
     })
       .then(res => res.json())
       .then(data => console.log(data))
-      .catch(console.error)
+      .catch(console.error);
   }
 });
-
 
 app.listen(3000, () => {
   console.log('Server is running on port 3000');
