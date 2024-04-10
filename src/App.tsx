@@ -1,30 +1,53 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { getCurrentlyPlaying } from './api/getCurrentlyPlaying'
-const token = 'BQBPyTjLbPKZtq6QNivK79294ebUQMuBvOoTxTCzq3dzRG41kBqBiHRwyUlm-aIPKkmyIsaHPZTjGGLVJ-_hWsvQS-sZFLNT5ut9Z-CyL_C0rs3p5eCOjWh-xDwK1g4s-koewk6Wn2_gbYj7dmAAYJ-DbmNKTjJtFnriZ5gQnq3oBEBiYxFIhUqhD79B3iHBeGA-9HYIMilwr6-pFl-AltaZ';
+import { getRefreshToken } from './api/getRefreshToken';
 
-function App() {
-  const [artist, setArtist] = useState('');
+export const App = () => {
+  const [artist, setArtist] = useState(''); 
   const [song, setSong] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [token, setToken] = useState<string>();
 
-  const updateData = async () => {
-    const data = await getCurrentlyPlaying(token)
-    const artists = data.item.artists;
-    if (Array.isArray(artists)) {
-      const names = artists.map((artist) => artist.name);
-      setArtist(names.join(', '));
-    }
-
-    setSong(data.item.name);
-    setImageUrl(data.item.album.images[1].url);
+  const saveToken = (value: string) => {
+    setToken(value);
+    localStorage.setItem('token', value);
   }
+
+  useEffect(() => {
+    const oldToken = localStorage.getItem('token');
+    if (oldToken) {
+      setToken(oldToken);
+    }
+  }, [])
+
+  const updateData = useCallback(async () => {
+    if (!token) return;
+    try {
+      const data = await getCurrentlyPlaying(token)
+      const artists = data.item.artists;
+      if (Array.isArray(artists)) {
+        const names = artists.map((artist) => artist.name);
+        setArtist(names.join(', '));
+      }
+  
+      setSong(data.item.name);
+      setImageUrl(data.item.album.images[1].url);
+    } catch(error) {
+      if (error instanceof Error) {
+        if (error.message.startsWith('4')) {
+          return getRefreshToken().then(saveToken);
+        }
+      }
+      console.error(error);
+    }
+  }, [token]);
 
   useEffect(() => {
     const interval = setInterval(updateData, 10000);
     return () => {
       clearInterval(interval);
     }
-  }, [])
+  }, [updateData])
 
   return (
     <main className='min-h-screen flex justify-center items-center'>
@@ -43,5 +66,3 @@ function App() {
     </main>
   )
 }
-
-export default App

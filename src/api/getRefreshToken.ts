@@ -5,23 +5,19 @@ const clientSecret = import.meta.env.VITE_CLIENT_SECRET;
 
 export const getRefreshToken = async () => {
   if (!clientId || !clientSecret) return;
-  try {
-    const authorization = btoa(`${clientId}:${clientSecret}`);
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Basic ${authorization}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        grant_type: 'refresh_token',
-        refresh_token: refreshToken,
-        client_id: clientId
-      }),
-    })
-    const data = await response.json();
-    return data;
-  } catch(error) {
-    console.error(error);
-  }
+  const authorization = btoa(`${clientId}:${clientSecret}`);
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Basic ${authorization}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams({
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+      client_id: clientId
+    }),
+  })
+  const data = await response.json();
+  return data.access_token;
 };
