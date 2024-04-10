@@ -7,7 +7,7 @@ export const getCurrentlyPlaying = async (token: string) => {
     },
   });
   if (response.status < 200 || response.status >= 300) {
-    throw new Error(`${response.status}`);
+    throw response;
   }
   const data = await response.json();
   return data;

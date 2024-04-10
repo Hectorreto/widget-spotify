@@ -8,26 +8,23 @@ export const getToken = async () => {
   requestBody.append('client_id', clientId);
   requestBody.append('client_secret', clientSecret);
 
-  try {
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: requestBody.toString(),
-    });
-    const data = await response.json();
-    return {
-      access_token: String(data.access_token),
-      token_type: String(data.token_type),
-      expires_in: Number(data.expires_in),
-    };
-  }
-  catch (error) {
-    console.error(error);
-  }
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: requestBody.toString(),
+  });
+  const data = await response.json();
+  return {
+    access_token: String(data.access_token),
+    token_type: String(data.token_type),
+    expires_in: Number(data.expires_in),
+  };
 };
 
 getToken().then((data) => {
   console.log(data);
+}).catch((error) => {
+  console.error(error);
 });

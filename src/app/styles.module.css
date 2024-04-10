@@ -1,0 +1,16 @@
+.colorBar {
+  background-image: linear-gradient(to right, #16a34a, #9333ea, #ea580c);
+  background-size: 300%;
+  background-position: left;
+  animation: bg-animation 1s infinite alternate;
+  animation-timing-function: linear;
+}
+
+@keyframes bg-animation {
+  0% {
+    background-position: left;
+  }
+  100% {
+    background-position: right;
+  }
+}

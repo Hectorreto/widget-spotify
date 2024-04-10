@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
-import { getCurrentlyPlaying } from './api/getCurrentlyPlaying';
-import { getRefreshToken } from './api/getRefreshToken';
+import { getCurrentlyPlaying } from '../api/get-currently-playing';
+import { getRefreshToken } from '../api/get-refresh-token';
 
-export const App = () => {
+export const useSpotify = () => {
   const [artist, setArtist] = useState('');
   const [song, setSong] = useState('');
   const [imageUrl, setImageUrl] = useState('');
@@ -34,8 +34,8 @@ export const App = () => {
       setImageUrl(data.item.album.images[1].url);
     }
     catch (error) {
-      if (error instanceof Error) {
-        if (error.message.startsWith('4')) {
+      if (error instanceof Response) {
+        if (error.status >= 400 && error.status < 500) {
           return getRefreshToken().then(saveToken);
         }
       }
@@ -50,20 +50,5 @@ export const App = () => {
     };
   }, [updateData]);
 
-  return (
-    <main className="min-h-screen flex justify-center items-center">
-      <div className="flex gap-8 bg-blue-950 bg-opacity-40 p-6 rounded-3xl text-pretty shadow-md min-w-[800px]">
-        <div className="w-[200px] h-[200px] rounded-[25px] shadow-2xl overflow-hidden">
-          <img src={imageUrl} className="w-full h-full object-cover" alt="Song Image" />
-        </div>
-        <div className="flex-1 flex flex-col">
-          <p className="text-gray-400 text-[35px]">{artist}</p>
-          <p className="text-gray-50 text-[35px]">{song}</p>
-          <div className="flex-1 flex items-center">
-            <div className="bg-gradient-to-r from-green-600 to-purple-600 rounded-full h-[8px] w-full"></div>
-          </div>
-        </div>
-      </div>
-    </main>
-  );
+  return { imageUrl, artist, song };
 };
