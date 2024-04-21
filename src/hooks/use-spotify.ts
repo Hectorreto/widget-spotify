@@ -5,7 +5,7 @@ import { getRefreshToken } from '../api/get-refresh-token';
 export const useSpotify = () => {
   const [artist, setArtist] = useState('');
   const [song, setSong] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
+  const [imageUrl, setImageUrl] = useState('/loading.svg');
   const [token, setToken] = useState<string>();
 
   const saveToken = (value: string) => {
@@ -35,8 +35,11 @@ export const useSpotify = () => {
     }
     catch (error) {
       if (error instanceof Response) {
-        if (error.status >= 400 && error.status < 500) {
+        if (error.status === 401) { // Unauthorized
           return getRefreshToken().then(saveToken);
+        }
+        if (error.status === 204) { // No content
+          return console.log('Spotify is closed');
         }
       }
       console.error(error);

@@ -21,7 +21,7 @@ const generateRandomString = (n: number) => {
   return randomString;
 };
 
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
   res.send(`
     <style>
       a {
@@ -47,7 +47,7 @@ app.get('/', (req, res) => {
   `);
 });
 
-app.get('/login', (req, res) => {
+app.get('/login', (_req, res) => {
   const state = generateRandomString(16);
   const scope = 'user-read-currently-playing';
 

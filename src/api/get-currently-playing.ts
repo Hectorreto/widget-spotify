@@ -6,9 +6,11 @@ export const getCurrentlyPlaying = async (token: string) => {
       Authorization: `Bearer ${token}`,
     },
   });
-  if (response.status < 200 || response.status >= 300) {
+  const contentType = response.headers.get('Content-Type');
+  if (!response.ok || !contentType?.includes('application/json')) {
     throw response;
   }
+
   const data = await response.json();
   return data;
 };
