@@ -26,14 +26,13 @@ export const useSpotify = () => {
       const data = await getCurrentlyPlaying(token);
       const artists = data.item.artists;
       if (Array.isArray(artists)) {
-        const names = artists.map(artist => artist.name);
+        const names = artists.map((artist) => artist.name);
         setArtist(names.join(', '));
       }
 
       setSong(data.item.name);
       setImageUrl(data.item.album.images[1].url);
-    }
-    catch (error) {
+    } catch (error) {
       if (error instanceof Response) {
         if (error.status === 401) { // Unauthorized
           return getRefreshToken().then(saveToken);

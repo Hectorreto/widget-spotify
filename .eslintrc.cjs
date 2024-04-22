@@ -1,3 +1,17 @@
+const stylistic = require('@stylistic/eslint-plugin');
+
+const customized = stylistic.configs.customize({
+  arrowParens: true,
+  blockSpacing: true,
+  braceStyle: '1tbs',
+  commaDangle: 'always-multiline',
+  indent: 2,
+  jsx: true,
+  quoteProps: 'consistent-as-needed',
+  quotes: 'single',
+  semi: true,
+});
+
 module.exports = {
   root: true,
   env: { browser: true, es2020: true },
@@ -9,12 +23,14 @@ module.exports = {
   ],
   ignorePatterns: ['dist', '.eslintrc.cjs'],
   parser: '@typescript-eslint/parser',
-  plugins: ['react-refresh'],
+  plugins: ['react-refresh', '@stylistic'],
   rules: {
     'react-refresh/only-export-components': [
       'warn',
       { allowConstantExport: true },
     ],
-    '@stylistic/semi': ['error', 'always'],
+    ...customized.rules,
+    '@stylistic/multiline-ternary': ['off'],
+    '@stylistic/jsx-one-expression-per-line': ['off'],
   },
 }

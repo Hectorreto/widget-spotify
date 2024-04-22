@@ -70,8 +70,7 @@ app.get('/callback', function (req, res) {
     + querystring.stringify({
       error: 'state_mismatch',
     }));
-  }
-  else {
+  } else {
     // @ts-expect-error Buffer doesn't have a type for its constructor
     const authorization = new Buffer.from(client_id + ':' + client_secret).toString('base64');
     const url = 'https://accounts.spotify.com/api/token';
@@ -89,8 +88,8 @@ app.get('/callback', function (req, res) {
       },
       body: requestBody.toString(),
     })
-      .then(res => res.json())
-      .then(data => console.log(data))
+      .then((res) => res.json())
+      .then((data) => console.log(data))
       .catch(console.error);
   }
 });
