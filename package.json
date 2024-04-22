@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "server": "npx tsx --env-file=.env src/server/server.ts",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "prepare": "husky"

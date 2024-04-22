@@ -1,12 +1,23 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getCurrentlyPlaying } from '../api/get-currently-playing';
-import { getTokenFromRefreshToken } from '../api/get-token-from-refresh-token';
+import { getTokenFromCode } from '../api/get-token-from-code';
 
 export const useSpotify = () => {
   const [artist, setArtist] = useState('');
   const [song, setSong] = useState('');
   const [imageUrl, setImageUrl] = useState('/loading.svg');
   const [token, setToken] = useState<string>();
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const code = searchParams.get('code');
+    const state = searchParams.get('state');
+
+    if (code && state) {
+      localStorage.setItem('code', code);
+      localStorage.setItem('state', state);
+    }
+  }, []);
 
   const saveToken = (value: string) => {
     setToken(value);
@@ -21,8 +32,9 @@ export const useSpotify = () => {
   }, []);
 
   const updateData = useCallback(async () => {
-    if (!token) return;
     try {
+      if (!token) throw new Error('Unauthorized');
+
       const data = await getCurrentlyPlaying(token);
       const artists = data.item.artists;
       if (Array.isArray(artists)) {
@@ -33,12 +45,17 @@ export const useSpotify = () => {
       setSong(data.item.name);
       setImageUrl(data.item.album.images[1].url);
     } catch (error) {
-      if (error instanceof Response) {
-        if (error.status === 401) { // Unauthorized
-          getTokenFromRefreshToken().then((token) => saveToken(token));
+      if (error instanceof Error) {
+        if (error.message === 'Unauthorized') {
+          const code = localStorage.getItem('code');
+          if (!code) return;
+
+          getTokenFromCode(code)
+            .then((token) => saveToken(token));
+
           return;
         }
-        if (error.status === 204) { // No content
+        if (error.message === 'No content') {
           return console.log('Spotify is closed');
         }
       }

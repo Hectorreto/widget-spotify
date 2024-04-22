@@ -1,6 +1,7 @@
 import express from 'express';
 import querystring from 'querystring';
-import { getTokenFromCode } from '../api/get-token-from-code';
+import { getRefreshTokenFromCode } from '../api/get-refresh-token-from-code';
+import { getTokenFromRefreshToken } from '../api/get-token-from-refresh-token';
 
 const CLIENT_ID = process.env.CLIENT_ID || '';
 const REDIRECT_URL = process.env.REDIRECT_URL || '';
@@ -47,7 +48,7 @@ app.get('/', (_req, res) => {
 
 type User = {
   state: string;
-  refresh_token: string;
+  refreshToken: string;
 };
 
 const database = {
@@ -60,7 +61,7 @@ app.get('/login', (_req, res) => {
 
   database.users[state] = {
     state: state,
-    refresh_token: '',
+    refreshToken: '',
   };
 
   res.redirect('https://accounts.spotify.com/authorize?' + querystring.stringify({
@@ -83,14 +84,48 @@ app.get('/callback', (req, res) => {
     return;
   }
 
-  getTokenFromCode(code as string)
+  getRefreshTokenFromCode(code as string)
     .then(({ refresh_token }) => {
-      const user = database.users[state as string];
-      user.refresh_token = refresh_token;
+      const user = database.users[code as string];
+      user.refreshToken = refresh_token;
     })
     .catch(console.error);
 
   res.send('Success! You can close this tab.');
+});
+
+app.get('/token', (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+
+  const code = req.query.code || null;
+  if (typeof code !== 'string') {
+    res.status(400).json({
+      error: 'code_mismatch',
+    });
+    return;
+  }
+
+  Promise.resolve()
+    .then(async () => {
+      if (database.users[code]?.refreshToken) {
+        return database.users[code].refreshToken;
+      } else {
+        const data = await getRefreshTokenFromCode(code);
+        database.users[code].refreshToken = data.refresh_token;
+        return data.refresh_token;
+      }
+    })
+    .then(async (refreshToken) => {
+      const accessToken = await getTokenFromRefreshToken(refreshToken);
+      res.json({
+        access_token: accessToken,
+      });
+    })
+    .catch((error) => {
+      res.status(500).json({
+        error: error,
+      });
+    });
 });
 
 app.listen(3000, () => {

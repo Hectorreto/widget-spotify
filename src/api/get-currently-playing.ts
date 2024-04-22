@@ -6,9 +6,13 @@ export const getCurrentlyPlaying = async (token: string) => {
       Authorization: `Bearer ${token}`,
     },
   });
-  const contentType = response.headers.get('Content-Type');
-  if (!response.ok || !contentType?.includes('application/json')) {
-    throw response;
+
+  if (response.status === 401) {
+    throw new Error('Unauthorized');
+  }
+
+  if (response.status === 204) {
+    throw new Error('No content');
   }
 
   const data = await response.json();
