@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getCurrentlyPlaying } from '../api/get-currently-playing';
-import { getRefreshToken } from '../api/get-refresh-token';
+import { getTokenFromRefreshToken } from '../api/get-token-from-refresh-token';
 
 export const useSpotify = () => {
   const [artist, setArtist] = useState('');
@@ -35,7 +35,8 @@ export const useSpotify = () => {
     } catch (error) {
       if (error instanceof Response) {
         if (error.status === 401) { // Unauthorized
-          return getRefreshToken().then(saveToken);
+          getTokenFromRefreshToken().then((token) => saveToken(token));
+          return;
         }
         if (error.status === 204) { // No content
           return console.log('Spotify is closed');

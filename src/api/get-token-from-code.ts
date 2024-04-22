@@ -1,34 +1,34 @@
-const endpoint = 'https://accounts.spotify.com/api/token';
-const code = 'AQBYml8i5_znVR1E0FSCvsuGIF7Oc4pOCWA7JuBMFRY3TN6vN0E9FzC4q90VPZfeBmSJP2zSAtqCmbKCU1etRt8ZFAltddd7fwVueC4EhJyOHAZax-FmCedgVbG8gnis0GvtZxDLTNnwj32X--D-y7Wh5cn8aSF4DljwCM6YTamAoBMrhs54lh29PpA1fEcrb9nGPhvgZG-BAb9khdmSiCR5AeiboNqdNgcjqz0_DMGEa12NaOi_ACYDgmuE2aeqIYkGKnnwSmzkYk5QstMTdLl_';
-const redirect_uri = 'https://96d2-2806-2f0-5161-ff4d-ac55-bac7-752-c170.ngrok-free.app/callback';
+const CLIENT_ID = process.env.CLIENT_ID || '';
+const CLIENT_SECRET = process.env.CLIENT_SECRET || '';
+const REDIRECT_URL = process.env.REDIRECT_URL || '';
+const API_URL = 'https://accounts.spotify.com/api/token';
 
-export const getToken = async () => {
-  const requestBody = new URLSearchParams();
-  requestBody.append('grant_type', 'authorization_code');
-  requestBody.append('code', code);
-  requestBody.append('redirect_uri', redirect_uri);
+export const getTokenFromCode = async (code: string) => {
+  const authorization = Buffer.from(CLIENT_ID + ':' + CLIENT_SECRET).toString('base64');
 
-  const response = await fetch(endpoint, {
+  const response = await fetch(API_URL, {
     method: 'POST',
     headers: {
-      'Authorization': '',
+      'Authorization': `Basic ${authorization}`,
       'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: requestBody.toString(),
+    body: new URLSearchParams({
+      grant_type: 'authorization_code',
+      code: code,
+      redirect_uri: REDIRECT_URL,
+    }),
   });
   const data = await response.json();
+
+  if ('error' in data) {
+    throw data;
+  }
+
   return {
     access_token: String(data.access_token),
     token_type: String(data.token_type),
     expires_in: Number(data.expires_in),
+    refresh_token: String(data.refresh_token),
+    scope: String(data.scope),
   };
 };
-
-getToken().then((data) => {
-  console.log(data);
-}).catch((error) => {
-  console.error(error);
-});
-
-// redirect-url/login
-// 'https://96d2-2806-2f0-5161-ff4d-ac55-bac7-752-c170.ngrok-free.app/callback?code=AQBYml8i5_znVR1E0FSCvsuGIF7Oc4pOCWA7JuBMFRY3TN6vN0E9FzC4q90VPZfeBmSJP2zSAtqCmbKCU1etRt8ZFAltddd7fwVueC4EhJyOHAZax-FmCedgVbG8gnis0GvtZxDLTNnwj32X--D-y7Wh5cn8aSF4DljwCM6YTamAoBMrhs54lh29PpA1fEcrb9nGPhvgZG-BAb9khdmSiCR5AeiboNqdNgcjqz0_DMGEa12NaOi_ACYDgmuE2aeqIYkGKnnwSmzkYk5QstMTdLl_&state=zKPhD5PViuQMHlv6'
